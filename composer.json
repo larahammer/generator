@@ -1,13 +1,13 @@
 {
-    "name": "stackgen-de/generator",
+    "name": "larahammer/generator",
     "description": "A powerful Laravel CRUD generator — scaffold migrations, models, controllers, views (Blade/Filament), and REST API resources from a single Artisan command.",
     "keywords": ["laravel", "crud", "generator", "scaffold", "filament", "rest-api", "blade"],
     "type": "library",
     "license": "MIT",
     "authors": [
         {
-            "name": "StackGen-de",
-            "email": "dev@stackGen.dev"
+            "name": "Larahammer",
+            "email": "dev@larahammer.dev"
         }
     ],
     "require": {
@@ -23,18 +23,18 @@
     },
     "autoload": {
         "psr-4": {
-            "StackGen-de\\Generator\\": "src/"
+            "Larahammer\\Generator\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "StackGen-de\\Generator\\Tests\\": "tests/"
+            "Larahammer\\Generator\\Tests\\": "tests/"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "StackGen-de\\Generator\\GeneratorServiceProvider"
+                "Larahammer\\Generator\\GeneratorServiceProvider"
             ]
         }
     },

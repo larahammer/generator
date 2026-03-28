@@ -1,8 +1,8 @@
-# LaraForge Generator
+# Larahammer Generator
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/laraforge/generator.svg?style=flat-square)](https://packagist.org/packages/laraforge/generator)
-[![Total Downloads](https://img.shields.io/packagist/dt/laraforge/generator.svg?style=flat-square)](https://packagist.org/packages/laraforge/generator)
-[![License](https://img.shields.io/github/license/laraforge/generator.svg?style=flat-square)](LICENSE.md)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/larahammer/generator.svg?style=flat-square)](https://packagist.org/packages/larahammer/generator)
+[![Total Downloads](https://img.shields.io/packagist/dt/larahammer/generator.svg?style=flat-square)](https://packagist.org/packages/larahammer/generator)
+[![License](https://img.shields.io/github/license/larahammer/generator.svg?style=flat-square)](LICENSE.md)
 
 **Scaffold a complete Laravel CRUD in seconds.** One command generates migration, model, controller, form request, views, and routes — for Blade, Filament v3, or REST API.
 
@@ -21,7 +21,7 @@
 ## Installation
 
 ```bash
-composer require laraforge/generator
+composer require larahammer/generator
 ```
 
 That's it. Laravel auto-discovers the package via its Service Provider.
@@ -31,13 +31,13 @@ That's it. Laravel auto-discovers the package via its Service Provider.
 ## Usage
 
 ```bash
-php artisan laragen:make {ModelName} {field:type ...}
+php artisan larahammer:make {ModelName} {field:type ...}
 ```
 
 ### Basic Example
 
 ```bash
-php artisan laragen:make Product name:string price:decimal stock:integer status:enum(active,inactive)
+php artisan larahammer:make Product name:string price:decimal stock:integer status:enum(active,inactive)
 ```
 
 You'll be prompted to choose an output target:
@@ -53,9 +53,9 @@ Select output target:
 ### Skip the Prompt — Pass Target Directly
 
 ```bash
-php artisan laragen:make Product name:string price:decimal --target=api
-php artisan laragen:make Post title:string body:text --target=filament
-php artisan laragen:make Order amount:decimal note:text:nullable --target=all
+php artisan larahammer:make Product name:string price:decimal --target=api
+php artisan larahammer:make Post title:string body:text --target=filament
+php artisan larahammer:make Order amount:decimal note:text:nullable --target=all
 ```
 
 ---
@@ -82,7 +82,7 @@ php artisan laragen:make Order amount:decimal note:text:nullable --target=all
 Append `:nullable` or `:unique` after the type:
 
 ```bash
-php artisan laragen:make User email:string:unique bio:text:nullable
+php artisan larahammer:make User email:string:unique bio:text:nullable
 ```
 
 ---
@@ -91,7 +91,7 @@ php artisan laragen:make User email:string:unique bio:text:nullable
 
 For a command like:
 ```bash
-php artisan laragen:make Post title:string body:text published:boolean --target=all
+php artisan larahammer:make Post title:string body:text published:boolean --target=all
 ```
 
 ```
@@ -130,10 +130,10 @@ php artisan filament:install
 Publish the stubs to your project and modify them freely:
 
 ```bash
-php artisan vendor:publish --tag=laraforge-stubs
+php artisan vendor:publish --tag=larahammer-stubs
 ```
 
-Stubs will be published to `stubs/laraforge/`. LaraForge will use your custom stubs over the package defaults automatically.
+Stubs will be published to `stubs/larahammer/`. Larahammer will use your custom stubs over the package defaults automatically.
 
 ---
 
@@ -142,10 +142,10 @@ Stubs will be published to `stubs/laraforge/`. LaraForge will use your custom st
 Publish the config:
 
 ```bash
-php artisan vendor:publish --tag=laraforge-config
+php artisan vendor:publish --tag=larahammer-config
 ```
 
-Options in `config/laraforge.php`:
+Options in `config/larahammer.php`:
 
 ```php
 'default_target' => 'blade',   // Skip the prompt — set your default
@@ -157,7 +157,7 @@ Options in `config/laraforge.php`:
 ## Force Overwrite
 
 ```bash
-php artisan laragen:make Product name:string --force
+php artisan larahammer:make Product name:string --force
 ```
 
 ---

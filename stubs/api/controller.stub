@@ -1,0 +1,42 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\{{ model }};
+use App\Http\Requests\{{ request }};
+use App\Http\Resources\{{ resource }};
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+
+class {{ model }}Controller extends Controller
+{
+    public function index(): AnonymousResourceCollection
+    {
+        ${{ variable }}s = {{ model }}::latest()->paginate(15);
+        return {{ resource }}::collection(${{ variable }}s);
+    }
+
+    public function store({{ request }} $request): {{ resource }}
+    {
+        ${{ variable }} = {{ model }}::create($request->validated());
+        return new {{ resource }}(${{ variable }});
+    }
+
+    public function show({{ model }} ${{ variable }}): {{ resource }}
+    {
+        return new {{ resource }}(${{ variable }});
+    }
+
+    public function update({{ request }} $request, {{ model }} ${{ variable }}): {{ resource }}
+    {
+        ${{ variable }}->update($request->validated());
+        return new {{ resource }}(${{ variable }});
+    }
+
+    public function destroy({{ model }} ${{ variable }}): JsonResponse
+    {
+        ${{ variable }}->delete();
+        return response()->json(['message' => '{{ model }} deleted successfully.']);
+    }
+}

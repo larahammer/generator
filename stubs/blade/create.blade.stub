@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create {{ model }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+<div class="max-w-2xl mx-auto px-4 py-8">
+
+    <div class="flex items-center gap-3 mb-6">
+        <a href="{{ route('{{ route }}.index') }}" class="text-gray-400 hover:text-gray-600">
+            ← Back
+        </a>
+        <h1 class="text-2xl font-bold text-gray-900">Create {{ model }}</h1>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <form action="{{ route('{{ route }}.store') }}" method="POST">
+            @csrf
+
+            {{ fields }}
+
+            <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100">
+                <a href="{{ route('{{ route }}.index') }}"
+                   class="px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                    Cancel
+                </a>
+                <button type="submit"
+                        class="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                    Save {{ model }}
+                </button>
+            </div>
+        </form>
+    </div>
+
+</div>
+</body>
+</html>
