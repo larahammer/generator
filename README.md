@@ -58,6 +58,33 @@ php artisan larahammer:make Post title:string body:text --target=filament
 php artisan larahammer:make Order amount:decimal note:text:nullable --target=all
 ```
 
+### Generate Everything — Use `--all` Flag
+
+Generate all targets and all advanced features with a single flag:
+
+```bash
+php artisan larahammer:make Product name:string price:decimal --all
+```
+
+This is equivalent to:
+
+```bash
+php artisan larahammer:make Product name:string price:decimal \
+  --target=all \
+  --with-roles \
+  --with-admin \
+  --with-landing \
+  --with-security-middleware \
+  --with-factories \
+  --with-soft-deletes \
+  --with-policies \
+  --with-api-auth \
+  --with-tests \
+  --with-audit-log
+```
+
+**Output: 80+ production-ready files instantly!** 🚀
+
 ---
 
 ## Field Types

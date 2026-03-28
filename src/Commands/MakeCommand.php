@@ -39,6 +39,7 @@ class MakeCommand extends Command
                             {--with-tests : Generate feature and unit tests}
                             {--with-audit-log : Generate activity logging with observer}
                             {--with-admin : Generate complete Filament admin panel}
+                            {--all : Generate everything (all targets + all features)}
                             {--force : Overwrite existing files}';
 
     protected $description = 'Scaffold a full CRUD (migration, model, controller, views/resource, routes) from a single command.';
@@ -49,6 +50,22 @@ class MakeCommand extends Command
         $fields = FieldParser::parse($this->argument('fields'));
         $target = $this->resolveTarget();
         $force  = $this->option('force');
+
+        // If --all flag is set, enable everything
+        if ($this->option('all')) {
+            $target = 'all';
+            $this->input->setOption('target', 'all');
+            $this->input->setOption('with-roles', true);
+            $this->input->setOption('with-admin', true);
+            $this->input->setOption('with-landing', true);
+            $this->input->setOption('with-security-middleware', true);
+            $this->input->setOption('with-factories', true);
+            $this->input->setOption('with-soft-deletes', true);
+            $this->input->setOption('with-policies', true);
+            $this->input->setOption('with-api-auth', true);
+            $this->input->setOption('with-tests', true);
+            $this->input->setOption('with-audit-log', true);
+        }
 
         $this->info("🔨 Larahammer Generator — scaffolding <fg=cyan>{$name}</>");
         $this->newLine();
