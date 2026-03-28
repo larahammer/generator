@@ -1,0 +1,46 @@
+{
+    "name": "stackgen-de/generator",
+    "description": "A powerful Laravel CRUD generator — scaffold migrations, models, controllers, views (Blade/Filament), and REST API resources from a single Artisan command.",
+    "keywords": ["laravel", "crud", "generator", "scaffold", "filament", "rest-api", "blade"],
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "StackGen-de",
+            "email": "dev@stackGen.dev"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "illuminate/support": "^10.0|^11.0|^12.0|^13.0",
+        "illuminate/console": "^10.0|^11.0|^12.0|^13.0",
+        "illuminate/filesystem": "^10.0|^11.0|^12.0|^13.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^8.0|^9.0",
+        "phpunit/phpunit": "^10.0|^11.0",
+        "pestphp/pest": "^2.0|^3.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "StackGen-de\\Generator\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "StackGen-de\\Generator\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "StackGen-de\\Generator\\GeneratorServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
