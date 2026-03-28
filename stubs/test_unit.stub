@@ -1,0 +1,50 @@
+<?php
+
+namespace Tests\Unit;
+
+use App\Models\{{ model }};
+use PHPUnit\Framework\TestCase;
+
+class {{ model }}Test extends TestCase
+{
+    /**
+     * Test model can be instantiated
+     */
+    public function test_model_instantiation(): void
+    {
+        ${{ model_variable }} = new {{ model }}();
+
+        $this->assertInstanceOf({{ model }}::class, ${{ model_variable }});
+    }
+
+    /**
+     * Test model fillable attributes
+     */
+    public function test_model_fillable_attributes(): void
+    {
+        ${{ model_variable }} = new {{ model }}([
+            'name' => 'Test',
+        ]);
+
+        $this->assertEquals('Test', ${{ model_variable }}->name);
+    }
+
+    /**
+     * Test model relations
+     */
+    public function test_model_has_relations(): void
+    {
+        // Example: test if model has user relationship
+        // $this->assertTrue(method_exists({{ model }}::class, 'user'));
+    }
+
+    /**
+     * Test model scopes
+     */
+    public function test_model_scopes(): void
+    {
+        {{ model }}::factory(3)->active()->create();
+
+        // $this->assertEquals(3, {{ model }}::active()->count());
+    }
+}

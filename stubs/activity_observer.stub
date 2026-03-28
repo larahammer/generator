@@ -1,0 +1,66 @@
+<?php
+
+namespace App\Observers;
+
+use App\Models\{{ model }};
+use App\Models\ActivityLog;
+use Illuminate\Support\Facades\Auth;
+
+class {{ model }}Observer
+{
+    /**
+     * Handle the {{ model }} "created" event.
+     */
+    public function created({{ model }} ${{ model_variable }}): void
+    {
+        $this->logActivity(${{ model_variable }}, 'created', null, ${{ model_variable }}->toArray());
+    }
+
+    /**
+     * Handle the {{ model }} "updated" event.
+     */
+    public function updated({{ model }} ${{ model_variable }}): void
+    {
+        $changes = collect(${{ model_variable }}->getChanges())
+            ->diffAssoc(${{ model_variable }}->getOriginal())
+            ->toArray();
+
+        $this->logActivity(${{ model_variable }}, 'updated', ${{ model_variable }}->getOriginal(), $changes);
+    }
+
+    /**
+     * Handle the {{ model }} "deleted" event.
+     */
+    public function deleted({{ model }} ${{ model_variable }}): void
+    {
+        $this->logActivity(${{ model_variable }}, 'deleted', ${{ model_variable }}->toArray(), null);
+    }
+
+    /**
+     * Handle the {{ model }} "restored" event.
+     */
+    public function restored({{ model }} ${{ model_variable }}): void
+    {
+        $this->logActivity(${{ model_variable }}, 'restored', null, ${{ model_variable }}->toArray());
+    }
+
+    /**
+     * Log the activity
+     */
+    private function logActivity({{ model }} ${{ model_variable }}, string $action, ?array $before = null, ?array $after = null): void
+    {
+        ActivityLog::create([
+            'user_id' => Auth::id(),
+            'loggable_type' => {{ model }}::class,
+            'loggable_id' => ${{ model_variable }}->id,
+            'action' => $action,
+            'changes' => [
+                'before' => $before,
+                'after' => $after,
+            ],
+            'ip_address' => request()?->ip(),
+            'user_agent' => request()?->userAgent(),
+            'created_at' => now(),
+        ]);
+    }
+}

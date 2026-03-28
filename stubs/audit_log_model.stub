@@ -1,0 +1,74 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+
+/**
+ * ActivityLog Model
+ * 
+ * Logs all activity on models with the HasActivity trait
+ * Records: created, updated, deleted events
+ */
+class ActivityLog extends Model
+{
+    public $timestamps = false;
+
+    protected $fillable = [
+        'user_id',
+        'loggable_type',
+        'loggable_id',
+        'action',
+        'changes',
+        'ip_address',
+        'user_agent',
+        'created_at',
+    ];
+
+    protected $casts = [
+        'changes' => 'json',
+        'created_at' => 'datetime',
+    ];
+
+    /**
+     * Get the model that triggered the activity
+     */
+    public function loggable(): MorphTo
+    {
+        return $this->morphTo();
+    }
+
+    /**
+     * Get the user who performed the action
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class)->withTrashed();
+    }
+
+    /**
+     * Scope to get activities by action
+     */
+    public function scopeByAction($query, $action)
+    {
+        return $query->where('action', $action);
+    }
+
+    /**
+     * Scope to get activities by model type
+     */
+    public function scopeByModel($query, $modelClass)
+    {
+        return $query->where('loggable_type', $modelClass);
+    }
+
+    /**
+     * Scope to get recent activities
+     */
+    public function scopeRecent($query, $hours = 24)
+    {
+        return $query->where('created_at', '>=', now()->subHours($hours))
+                    ->orderBy('created_at', 'desc');
+    }
+}

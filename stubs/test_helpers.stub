@@ -1,0 +1,43 @@
+<?php
+
+namespace Tests;
+
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+
+abstract class TestCase extends BaseTestCase
+{
+    use RefreshDatabase;
+
+    /**
+     * Refresh the database before each test.
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+        
+        // Additional setup for tests
+    }
+
+    /**
+     * Create an authenticated user for testing
+     */
+    protected function authenticatedUser()
+    {
+        return $this->actingAs(
+            \App\Models\User::factory()->create()
+        );
+    }
+
+    /**
+     * Create an admin user for testing
+     */
+    protected function adminUser()
+    {
+        return $this->actingAs(
+            \App\Models\User::factory()
+                ->hasAttached(\App\Models\Role::where('name', 'admin')->first())
+                ->create()
+        );
+    }
+}
