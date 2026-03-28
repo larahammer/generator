@@ -54,6 +54,7 @@ class BladeGenerator extends BaseGenerator
     {
         $lines = [];
         $readonly = $view === 'show' ? 'disabled' : '';
+        $varName = $this->variableName();
 
         foreach ($this->fields as $field) {
             $inputType = FieldParser::toInputType($field);
@@ -64,7 +65,7 @@ class BladeGenerator extends BaseGenerator
                 $lines[] = <<<HTML
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-1">{$label}</label>
-                    <textarea name="{$name}" rows="4" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500" {$readonly}>{{ old('{$name}', \${{ variable }}->{$name} ?? '') }}</textarea>
+                    <textarea name="{$name}" rows="4" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500" {$readonly}>{{ old('{$name}', \${$varName}->{$name} ?? '') }}</textarea>
                     @error('{$name}') <p class="text-red-500 text-xs mt-1">{{ \$message }}</p> @enderror
                 </div>
                 HTML;
@@ -72,7 +73,7 @@ class BladeGenerator extends BaseGenerator
                 $options = '';
                 foreach ($field['enum_values'] as $val) {
                     $label2   = ucfirst($val);
-                    $options .= "\n                        <option value=\"{$val}\" {{ old('{$name}', \${{ variable }}->{$name} ?? '') == '{$val}' ? 'selected' : '' }}>{$label2}</option>";
+                    $options .= "\n                        <option value=\"{$val}\" {{ old('{$name}', \${$varName}->{$name} ?? '') == '{$val}' ? 'selected' : '' }}>{$label2}</option>";
                 }
                 $lines[] = <<<HTML
                 <div class="mb-4">
@@ -86,7 +87,7 @@ class BladeGenerator extends BaseGenerator
                 $lines[] = <<<HTML
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-1">{$label}</label>
-                    <input type="{$inputType}" name="{$name}" value="{{ old('{$name}', \${{ variable }}->{$name} ?? '') }}" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500" {$readonly} />
+                    <input type="{$inputType}" name="{$name}" value="{{ old('{$name}', \${$varName}->{$name} ?? '') }}" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500" {$readonly} />
                     @error('{$name}') <p class="text-red-500 text-xs mt-1">{{ \$message }}</p> @enderror
                 </div>
                 HTML;
@@ -108,8 +109,9 @@ class BladeGenerator extends BaseGenerator
 
     private function buildTableRows(): string
     {
+        $varName = $this->variableName();
         $rows = array_map(
-            fn($f) => "<td class=\"px-4 py-3 text-sm text-gray-900\">{{ \${{ variable }}->{$f['name']} }}</td>",
+            fn($f) => "<td class=\"px-4 py-3 text-sm text-gray-900\">{{ \${$varName}->{$f['name']} }}</td>",
             $this->fields
         );
 
