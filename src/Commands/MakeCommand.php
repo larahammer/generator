@@ -11,6 +11,12 @@ use Larahammer\Generator\Generators\RouteGenerator;
 use Larahammer\Generator\Generators\RoleGenerator;
 use Larahammer\Generator\Generators\LandingPageGenerator;
 use Larahammer\Generator\Generators\SecurityMiddlewareGenerator;
+use Larahammer\Generator\Generators\FactoryGenerator;
+use Larahammer\Generator\Generators\SoftDeletesGenerator;
+use Larahammer\Generator\Generators\PolicyGenerator;
+use Larahammer\Generator\Generators\ApiAuthenticationGenerator;
+use Larahammer\Generator\Generators\TestingGenerator;
+use Larahammer\Generator\Generators\AuditLogGenerator;
 use Larahammer\Generator\Generators\targets\BladeGenerator;
 use Larahammer\Generator\Generators\targets\FilamentGenerator;
 use Larahammer\Generator\Generators\targets\ApiGenerator;
@@ -25,8 +31,14 @@ class MakeCommand extends Command
                             {--target= : Output target: blade, filament, api, all}
                             {--with-roles : Generate role system with migrations and seeders}
                             {--with-landing : Generate landing page}
-                            {--with-admin : Generate complete Filament admin panel}
                             {--with-security-middleware : Generate CheckRole and AdminPanelProtection middleware}
+                            {--with-factories : Generate model factory with Faker data}
+                            {--with-soft-deletes : Add soft deletes to model and migration}
+                            {--with-policies : Generate authorization policy class}
+                            {--with-api-auth : Generate API authentication middleware and setup}
+                            {--with-tests : Generate feature and unit tests}
+                            {--with-audit-log : Generate activity logging with observer}
+                            {--with-admin : Generate complete Filament admin panel}
                             {--force : Overwrite existing files}';
 
     protected $description = 'Scaffold a full CRUD (migration, model, controller, views/resource, routes) from a single command.';
@@ -58,6 +70,33 @@ class MakeCommand extends Command
 
         if ($this->option('with-security-middleware')) {
             $this->runGenerator('Security Middleware', fn() => (new SecurityMiddlewareGenerator($name, $fields, $force))->generate());
+        }
+
+        // --- Fase 1: Factories & Soft Deletes ---
+        if ($this->option('with-factories')) {
+            $this->runGenerator('Model Factory', fn() => (new FactoryGenerator($name, $fields, $force))->generate());
+        }
+
+        if ($this->option('with-soft-deletes')) {
+            $this->runGenerator('Soft Deletes', fn() => (new SoftDeletesGenerator($name, $fields, $force))->generate());
+        }
+
+        // --- Fase 2: Policies & API Auth ---
+        if ($this->option('with-policies')) {
+            $this->runGenerator('Authorization Policy', fn() => (new PolicyGenerator($name, $fields, $force))->generate());
+        }
+
+        if ($this->option('with-api-auth')) {
+            $this->runGenerator('API Authentication', fn() => (new ApiAuthenticationGenerator($name, $fields, $force))->generate());
+        }
+
+        // --- Fase 3: Tests & Audit Logging ---
+        if ($this->option('with-tests')) {
+            $this->runGenerator('Tests (Feature + Unit)', fn() => (new TestingGenerator($name, $fields, $force))->generate());
+        }
+
+        if ($this->option('with-audit-log')) {
+            $this->runGenerator('Activity Logging', fn() => (new AuditLogGenerator($name, $fields, $force))->generate());
         }
 
         // --- Target-specific generators ---
@@ -135,24 +174,55 @@ class MakeCommand extends Command
             $this->line('  3. Run <fg=cyan>php artisan filament:install</> if not installed yet');
         }
 
-        $this->line('  ' . ($this->option('with-roles') || $this->option('with-admin') ? '4' : '3') . '. Seed dummy data: <fg=cyan>php artisan db:seed --class=' . $name . 'Seeder</>');
+        $this->line('  4. Seed dummy data: <fg=cyan>php artisan db:seed --class=' . $name . 'Seeder</>');
+        
+        if ($this->option('with-audit-log')) {
+            $this->newLine();
+            $this->line('  5. Register observer for activity logging in <fg=cyan>app/Providers/EventServiceProvider.php</>:');
+            $this->line('     <fg=cyan>use App\Models\\' . $name . ';');
+            $this->line('     use App\Observers\\' . $name . 'Observer;');
+            $this->line('     ' . $name . '::observe(' . $name . 'Observer::class);</>' );
+        }
+
         $this->newLine();
+
+        // --- Feature Summaries ---
+        if ($this->option('with-factories')) {
+            $this->line('<fg=blue>i</> Factory generated: <fg=cyan>database/factories/' . $name . 'Factory.php</>');
+            $this->line('  Usage: <fg=cyan>' . $name . '::factory(10)->create();</>' );
+        }
+
+        if ($this->option('with-soft-deletes')) {
+            $this->line('<fg=blue>i</> Soft deletes enabled for <fg=cyan>' . $name . '</> model');
+        }
+
+        if ($this->option('with-policies')) {
+            $this->line('<fg=blue>i</> Policy generated: <fg=cyan>app/Policies/' . $name . 'Policy.php</>');
+            $this->line('  Register in <fg=cyan>app/Providers/AuthServiceProvider.php</>');
+        }
+
+        if ($this->option('with-api-auth')) {
+            $this->line('<fg=blue>i</> API Authentication middleware ready');
+            $this->line('  Add to routes/api.php: <fg=cyan>Route::middleware(\'api.auth\')->group(...)</>');
+        }
+
+        if ($this->option('with-tests')) {
+            $this->line('<fg=blue>i</> Tests generated:');
+            $this->line('  - <fg=cyan>tests/Feature/' . $name . 'CrudTest.php</> (feature tests)');
+            $this->line('  - <fg=cyan>tests/Unit/' . $name . 'Test.php</> (unit tests)');
+            $this->line('  Run: <fg=cyan>php artisan test</>');
+        }
 
         if ($this->option('with-landing')) {
             $this->line('<fg=blue>i</> Landing page generated at <fg=cyan>resources/views/landing.blade.php</>');
             $this->line('  Add route: <fg=cyan>Route::get(\'/\', [LandingController::class, \'index\'])->name(\'home\');</> in routes/web.php');
-            $this->newLine();
         }
 
         if ($this->option('with-security-middleware')) {
-            $this->line('<fg=blue>i</> Security middleware generated:');
-            $this->line('  - <fg=cyan>CheckRole</> middleware for role-based access control');
-            $this->line('  - <fg=cyan>AdminPanelProtection</> middleware for admin panel protection');
-            $this->line('  Add to <fg=cyan>app/Http/Kernel.php</> in $routeMiddleware:');
-            $this->line('    \'role\' => \App\Http\Middleware\CheckRole::class,');
-            $this->line('    \'admin\' => \App\Http\Middleware\AdminPanelProtection::class,');
-            $this->line('  See <fg=cyan>stubs/kernel_middleware_config.stub</> for route examples');
-            $this->newLine();
+            $this->line('<fg=blue>i</> Security middleware generated');
+            $this->line('  Register in <fg=cyan>app/Http/Kernel.php</> in $routeMiddleware');
         }
+
+        $this->newLine();
     }
 }

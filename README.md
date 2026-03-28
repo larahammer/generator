@@ -247,6 +247,245 @@ php artisan db:seed --class=RoleSeeder  # seed roles
 - Register the landing route in `routes/web.php`
 - Landing page accessible at home route
 
+---
+
+## Advanced Features — 3 Phases
+
+### **Phase 1: Factories & Data Management**
+
+#### Generate Model Factories
+
+```bash
+php artisan larahammer:make Product name:string price:decimal --with-factories
+```
+
+**Generates:** `database/factories/ProductFactory.php` with auto-generated Faker data
+
+**Usage:**
+```php
+// Create 10 products
+Product::factory(10)->create();
+
+// Create with specific state
+Product::factory(5)->active()->create();
+
+// Create with relationships
+Product::factory(20)
+    ->has(Review::factory(3))
+    ->has(Tag::factory(5))
+    ->create();
+```
+
+**Enhanced Seeder:** Automatically generates advanced seeder with factory usage instead of basic array data.
+
+#### Add Soft Deletes
+
+```bash
+php artisan larahammer:make Product name:string --with-soft-deletes
+```
+
+**Generates:**
+- Migration with `softDeletes()` column
+- Model with `SoftDeletes` trait
+- Automatic scopes for include/exclude deleted records
+
+**Usage:**
+```php
+$product->delete();              // Soft delete
+$product->restore();              // Restore
+$product->forceDelete();           // Permanent delete
+Product::withTrashed()->get();    // Include soft deleted
+Product::onlyTrashed()->get();    // Only soft deleted
+```
+
+---
+
+### **Phase 2: Security & Authorization**
+
+#### Generate Authorization Policies
+
+```bash
+php artisan larahammer:make Product name:string --with-policies
+```
+
+**Generates:** `app/Policies/ProductPolicy.php` with CRUD authorization gates
+
+**Features:**
+- `viewAny()`, `view()` — View authorization
+- `create()` — Creation authorization
+- `update()` — Update authorization (checks ownership)
+- `delete()` — Delete authorization
+- `restore()` / `forceDelete()` — Soft delete operations
+
+**Usage in Controller:**
+```php
+public function update(Product $product)
+{
+    $this->authorize('update', $product);
+    // Your update logic
+}
+```
+
+**Usage in Blade:**
+```blade
+@can('update', $product)
+    <button>Edit Product</button>
+@endcan
+```
+
+**Register Policy** (in `app/Providers/AuthServiceProvider.php`):
+```php
+protected $policies = [
+    Product::class => ProductPolicy::class,
+];
+```
+
+#### API Authentication & Rate Limiting
+
+```bash
+php artisan larahammer:make Product name:string --with-api-auth
+```
+
+**Generates:**
+- `ApiAuthentication` middleware for token validation
+- Rate limiting configuration
+- Bearer token validation with Sanctum
+
+**Setup in `routes/api.php`:**
+```php
+Route::middleware('api.auth')->group(function () {
+    Route::get('/products', [ProductController::class, 'index']);
+    Route::post('/products', [ProductController::class, 'store']);
+    Route::get('/products/{id}', [ProductController::class, 'show']);
+    Route::put('/products/{id}', [ProductController::class, 'update']);
+    Route::delete('/products/{id}', [ProductController::class, 'destroy']);
+});
+```
+
+**Create API token for client:**
+```php
+$token = auth()->user()->createToken('api-token')->plainTextToken;
+```
+
+**Rate limiting:**
+```php
+Route::middleware('throttle:100,1')->group(function () {
+    // Max 100 requests per minute
+    Route::get('/products/search', SearchController::class);
+});
+```
+
+---
+
+### **Phase 3: Testing & Auditing**
+
+#### Generate Automated Tests
+
+```bash
+php artisan larahammer:make Product name:string --with-tests
+```
+
+**Generates:**
+- `tests/Feature/ProductCrudTest.php` — Full CRUD feature tests
+- `tests/Unit/ProductTest.php` — Unit tests
+- Test helpers with factory integration
+
+**Feature Tests Include:**
+- Test list/show/create/update/delete operations
+- Test validation failures
+- Test authentication requirements
+- Response assertions
+
+**Run tests:**
+```bash
+php artisan test
+php artisan test tests/Feature/ProductCrudTest.php
+php artisan test --filter=test_can_create_record
+```
+
+#### Activity Logging & Audit Trail
+
+```bash
+php artisan larahammer:make Product name:string --with-audit-log
+```
+
+**Generates:**
+- `ActivityLog` model and migration
+- `ProductObserver` class for automatic logging
+- Audit trail with before/after changes
+
+**Features:**
+- Automatically logs: created, updated, deleted, restored events
+- Records: user, IP address, user agent, timestamp
+- Stores: before and after data for changes
+- JSON-storable change data
+
+**Register observer** (in `app/Providers/EventServiceProvider.php`):
+```php
+use App\Models\Product;
+use App\Observers\ProductObserver;
+
+public function boot(): void
+{
+    Product::observe(ProductObserver::class);
+}
+```
+
+**Query activity logs:**
+```php
+// Get all activity for a product
+$product->activityLogs()->get();
+
+// Get creation activity only
+ActivityLog::byAction('created')->byModel(Product::class)->get();
+
+// Get recent activity (last 24 hours)
+ActivityLog::recent()->get();
+
+// Check who updated what
+$log = ActivityLog::where('action', 'updated')->first();
+echo $log->user->name;           // Who made the change
+echo $log->changes['before'];    // Old data
+echo $log->changes['after'];     // New data
+```
+
+---
+
+## Super Command — All Features Combined
+
+Generate everything at once:
+
+```bash
+php artisan larahammer:make Product \
+  name:string \
+  price:decimal \
+  stock:integer \
+  status:enum(active,inactive) \
+  --target=filament \
+  --with-roles \
+  --with-admin \
+  --with-landing \
+  --with-security-middleware \
+  --with-factories \
+  --with-soft-deletes \
+  --with-policies \
+  --with-api-auth \
+  --with-tests \
+  --with-audit-log
+```
+
+**This generates 80+ files instantly with:**
+- ✅ Complete CRUD (Migration, Model, Controller)
+- ✅ Role system & admin panel (Filament)
+- ✅ Landing page
+- ✅ Security middleware
+- ✅ Model factories with Faker
+- ✅ Soft deletes
+- ✅ Authorization policies
+- ✅ API authentication & rate limiting
+- ✅ Feature & unit tests
+- ✅ Activity logging with audit trail
+
 
 
 ## Customizing Stubs
