@@ -1,0 +1,46 @@
+// Add to app/Providers/AuthServiceProvider.php
+
+<?php
+
+namespace App\Providers;
+
+use App\Models\{{ model }};
+use App\Policies\{{ model }}Policy;
+use Illuminate\Support\ServiceProvider;
+
+class AuthServiceProvider extends ServiceProvider
+{
+    /**
+     * The policy mappings for the application.
+     *
+     * @var array<class-string, class-string>
+     */
+    protected $policies = [
+        {{ model }}::class => {{ model }}Policy::class,
+    ];
+
+    /**
+     * Register any authentication / authorization services.
+     */
+    public function boot(): void
+    {
+        $this->registerPolicies();
+    }
+}
+
+// Usage in Controller:
+// public function update({{ model }} ${{ model_variable }})
+// {
+//     $this->authorize('update', ${{ model_variable }});
+//     // Your update logic here
+// }
+
+// Usage in Blade:
+// @can('update', ${{ model_variable }})
+//     <button>Edit</button>
+// @endcan
+
+// Usage in Model:
+// if (auth()->user()->can('delete', ${{ model_variable }})) {
+//     // Delete logic
+// }

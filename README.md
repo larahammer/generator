@@ -110,20 +110,144 @@ php artisan larahammer:make Post title:string body:text published:boolean --targ
 
 ---
 
-## After Generation
+## Advanced Options
+
+### Generate with Role System
+
+Add user roles with automatic migration and seeder:
 
 ```bash
-php artisan migrate
-php artisan db:seed --class=PostSeeder
-php artisan serve
+php artisan larahammer:make Product name:string --with-roles
 ```
 
-For Filament, make sure you've run:
+This generates:
+- `app/Models/Role.php` — Role model with relationships
+- `database/migrations/xxxx_create_roles_table.php` — Roles table
+- `database/seeders/RoleSeeder.php` — Seed predefined roles
+
+**Seed roles:**
 ```bash
-php artisan filament:install
+php artisan db:seed --class=RoleSeeder
+```
+
+Default roles created: `admin`, `editor`, `viewer`, `user`
+
+### Generate Filament Admin Panel
+
+Create a complete admin panel with User and Role management:
+
+```bash
+php artisan larahammer:make Product name:string --with-admin
+```
+
+This generates:
+- `app/Filament/Resources/UserResource.php` — User management with role selection
+- `app/Filament/Resources/RoleResource.php` — Role management
+- All necessary Filament pages (List, Create, Edit)
+
+**Access admin panel** at `/admin` (requires Filament v3 installed):
+- User Management: `/admin/users`
+- Role Management: `/admin/roles`
+
+### Generate Landing Page
+
+Create a ready-to-use landing page:
+
+```bash
+php artisan larahammer:make Product name:string --with-landing
+```
+
+This generates:
+- `resources/views/landing.blade.php` — Beautiful landing page
+- `app/Http/Controllers/LandingController.php` — Landing controller
+
+**Add route to `routes/web.php`:**
+```php
+use App\Http\Controllers\LandingController;
+
+Route::get('/', [LandingController::class, 'index'])->name('home');
+```
+
+### Generate Security Middleware
+
+Add role-based access control and admin panel protection:
+
+```bash
+php artisan larahammer:make Product name:string --with-security-middleware
+```
+
+This generates:
+- `app/Http/Middleware/CheckRole.php` — Role-based access control middleware
+- `app/Http/Middleware/AdminPanelProtection.php` — Admin panel protection middleware
+- Updated `app/Models/User.php` with role relationships and helper methods
+
+**Register middleware in `app/Http/Kernel.php`:**
+```php
+protected $routeMiddleware = [
+    // ... other middleware ...
+    'role' => \App\Http\Middleware\CheckRole::class,
+    'admin' => \App\Http\Middleware\AdminPanelProtection::class,
+];
+```
+
+**Usage in routes:**
+```php
+// Restrict to specific roles
+Route::middleware('role:admin,editor')->group(function () {
+    Route::get('/content', ContentController::class);
+});
+
+// Restrict to admin only
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/admin/dashboard', AdminController::class);
+});
+```
+
+**User model helpers:**
+```php
+auth()->user()->hasRole('admin');           // Check single role
+auth()->user()->hasAnyRole(['admin', 'editor']); // Check multiple roles
+auth()->user()->isAdmin();                  // Check if admin
+```
+
+### Combine Options
+
+```bash
+php artisan larahammer:make Product name:string price:decimal \
+  --target=filament \
+  --with-roles \
+  --with-admin \
+  --with-landing \
+  --with-security-middleware
 ```
 
 ---
+
+## After Generation
+
+Standard setup steps:
+
+```bash
+php artisan migrate
+php artisan db:seed --class=ProductSeeder
+php artisan serve
+```
+
+**If using `--with-roles`:**
+```bash
+php artisan db:seed --class=RoleSeeder  # seed roles
+```
+
+**If using `--with-admin`:**
+- Ensure Filament v3 is installed: `composer require filament/filament`
+- Run admin panel: `php artisan serve`
+- Access at: `http://localhost:8000/admin`
+
+**If using `--with-landing`:**
+- Register the landing route in `routes/web.php`
+- Landing page accessible at home route
+
+
 
 ## Customizing Stubs
 

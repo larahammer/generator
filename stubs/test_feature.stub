@@ -1,0 +1,95 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\{{ model }};
+use Tests\TestCase;
+
+class {{ model }}CrudTest extends TestCase
+{
+    /**
+     * Test listing {{ model }} records
+     */
+    public function test_can_list_records(): void
+    {
+        {{ model }}::factory(5)->create();
+
+        $response = $this->get(route('{{ route }}.index'));
+
+        $response->assertStatus(200)
+                 ->assertViewHas('{{ model_variable }}s');
+    }
+
+    /**
+     * Test viewing a single record
+     */
+    public function test_can_show_record(): void
+    {
+        ${{ model_variable }} = {{ model }}::factory()->create();
+
+        $response = $this->get(route('{{ route }}.show', ${{ model_variable }}));
+
+        $response->assertStatus(200)
+                 ->assertViewHas('{{ model_variable }}');
+    }
+
+    /**
+     * Test creating a record
+     */
+    public function test_can_create_record(): void
+    {
+        $data = {{ model }}::factory()->make()->toArray();
+
+        $response = $this->post(route('{{ route }}.store'), $data);
+
+        $response->assertRedirect();
+        $this->assertDatabaseHas('{{ route }}', $data);
+    }
+
+    /**
+     * Test updating a record
+     */
+    public function test_can_update_record(): void
+    {
+        ${{ model_variable }} = {{ model }}::factory()->create();
+        $newData = ['name' => 'Updated Name'];
+
+        $response = $this->put(route('{{ route }}.update', ${{ model_variable }}), $newData);
+
+        $response->assertRedirect();
+        $this->assertDatabaseHas('{{ route }}', $newData);
+    }
+
+    /**
+     * Test deleting a record
+     */
+    public function test_can_delete_record(): void
+    {
+        ${{ model_variable }} = {{ model }}::factory()->create();
+
+        $response = $this->delete(route('{{ route }}.destroy', ${{ model_variable }}));
+
+        $response->assertRedirect();
+        $this->assertSoftDeleted(${{ model_variable }});
+    }
+
+    /**
+     * Test validation on create
+     */
+    public function test_create_validation_fails(): void
+    {
+        $response = $this->post(route('{{ route }}.store'), []);
+
+        $response->assertSessionHasErrors();
+    }
+
+    /**
+     * Test unauthorized access
+     */
+    public function test_create_requires_authentication(): void
+    {
+        $response = $this->post(route('{{ route }}.store'), []);
+
+        $response->assertRedirect(route('login'));
+    }
+}

@@ -1,0 +1,46 @@
+<?php
+
+namespace Database\Factories;
+
+use App\Models\{{ model }};
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\{{ model }}>
+ */
+class {{ model }}Factory extends Factory
+{
+    protected $model = {{ model }}::class;
+
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        return [
+{{ field_definitions }}
+        ];
+    }
+
+    /**
+     * Indicate that the model should be in an active state.
+     */
+    public function active(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => 'active',
+        ]);
+    }
+
+    /**
+     * Indicate that the model should be in an inactive state.
+     */
+    public function inactive(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => 'inactive',
+        ]);
+    }
+}

@@ -8,9 +8,13 @@ use Larahammer\Generator\Generators\ModelGenerator;
 use Larahammer\Generator\Generators\RequestGenerator;
 use Larahammer\Generator\Generators\SeederGenerator;
 use Larahammer\Generator\Generators\RouteGenerator;
+use Larahammer\Generator\Generators\RoleGenerator;
+use Larahammer\Generator\Generators\LandingPageGenerator;
+use Larahammer\Generator\Generators\SecurityMiddlewareGenerator;
 use Larahammer\Generator\Generators\targets\BladeGenerator;
 use Larahammer\Generator\Generators\targets\FilamentGenerator;
 use Larahammer\Generator\Generators\targets\ApiGenerator;
+use Larahammer\Generator\Generators\targets\AdminPanelGenerator;
 use Larahammer\Generator\Support\FieldParser;
 
 class MakeCommand extends Command
@@ -19,6 +23,10 @@ class MakeCommand extends Command
                             {name : Model name (e.g. Product, BlogPost)}
                             {fields* : Field definitions (e.g. name:string price:decimal status:enum(active,inactive))}
                             {--target= : Output target: blade, filament, api, all}
+                            {--with-roles : Generate role system with migrations and seeders}
+                            {--with-landing : Generate landing page}
+                            {--with-admin : Generate complete Filament admin panel}
+                            {--with-security-middleware : Generate CheckRole and AdminPanelProtection middleware}
                             {--force : Overwrite existing files}';
 
     protected $description = 'Scaffold a full CRUD (migration, model, controller, views/resource, routes) from a single command.';
@@ -39,6 +47,19 @@ class MakeCommand extends Command
         $this->runGenerator('Request',   fn() => (new RequestGenerator($name, $fields, $force))->generate());
         $this->runGenerator('Seeder',    fn() => (new SeederGenerator($name, $fields, $force))->generate());
 
+        // --- Optional generators ---
+        if ($this->option('with-roles')) {
+            $this->runGenerator('Role System', fn() => (new RoleGenerator($name, $fields, $force))->generate());
+        }
+
+        if ($this->option('with-landing')) {
+            $this->runGenerator('Landing Page', fn() => (new LandingPageGenerator($name, $fields, $force))->generate());
+        }
+
+        if ($this->option('with-security-middleware')) {
+            $this->runGenerator('Security Middleware', fn() => (new SecurityMiddlewareGenerator($name, $fields, $force))->generate());
+        }
+
         // --- Target-specific generators ---
         if (in_array($target, ['blade', 'all'])) {
             $this->runGenerator('Blade Views + Controller', fn() => (new BladeGenerator($name, $fields, $force))->generate());
@@ -50,6 +71,10 @@ class MakeCommand extends Command
 
         if (in_array($target, ['api', 'all'])) {
             $this->runGenerator('API Controller + Resource', fn() => (new ApiGenerator($name, $fields, $force))->generate());
+        }
+
+        if ($this->option('with-admin')) {
+            $this->runGenerator('Filament Admin Panel', fn() => (new AdminPanelGenerator($name, $fields, $force))->generate());
         }
 
         // --- Routes ---
@@ -98,11 +123,36 @@ class MakeCommand extends Command
         $this->line('<fg=yellow>Next steps:</>');
         $this->line('  1. Run <fg=cyan>php artisan migrate</>');
 
-        if ($target === 'filament' || $target === 'all') {
-            $this->line('  2. Run <fg=cyan>php artisan filament:install</> if not installed yet');
+        if ($this->option('with-roles')) {
+            $this->line('  2. Run <fg=cyan>php artisan db:seed --class=RoleSeeder</> to seed roles');
         }
 
-        $this->line('  3. Seed dummy data: <fg=cyan>php artisan db:seed --class=' . $name . 'Seeder</>');
+        if ($this->option('with-admin')) {
+            $this->line('  3. Filament admin panel ready at <fg=cyan>/admin</> (requires Filament v3)');
+            $this->line('     - User Management at <fg=cyan>/admin/users</>');
+            $this->line('     - Role Management at <fg=cyan>/admin/roles</>');
+        } elseif ($target === 'filament' || $target === 'all') {
+            $this->line('  3. Run <fg=cyan>php artisan filament:install</> if not installed yet');
+        }
+
+        $this->line('  ' . ($this->option('with-roles') || $this->option('with-admin') ? '4' : '3') . '. Seed dummy data: <fg=cyan>php artisan db:seed --class=' . $name . 'Seeder</>');
         $this->newLine();
+
+        if ($this->option('with-landing')) {
+            $this->line('<fg=blue>i</> Landing page generated at <fg=cyan>resources/views/landing.blade.php</>');
+            $this->line('  Add route: <fg=cyan>Route::get(\'/\', [LandingController::class, \'index\'])->name(\'home\');</> in routes/web.php');
+            $this->newLine();
+        }
+
+        if ($this->option('with-security-middleware')) {
+            $this->line('<fg=blue>i</> Security middleware generated:');
+            $this->line('  - <fg=cyan>CheckRole</> middleware for role-based access control');
+            $this->line('  - <fg=cyan>AdminPanelProtection</> middleware for admin panel protection');
+            $this->line('  Add to <fg=cyan>app/Http/Kernel.php</> in $routeMiddleware:');
+            $this->line('    \'role\' => \App\Http\Middleware\CheckRole::class,');
+            $this->line('    \'admin\' => \App\Http\Middleware\AdminPanelProtection::class,');
+            $this->line('  See <fg=cyan>stubs/kernel_middleware_config.stub</> for route examples');
+            $this->newLine();
+        }
     }
 }

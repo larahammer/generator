@@ -1,0 +1,40 @@
+<?php
+
+return [
+    'default' => 'admin',
+
+    'brands' => [
+        'admin' => [
+            'name' => config('app.name'),
+            'logo' => null,
+            'favicon' => null,
+        ],
+    ],
+
+    'panels' => [
+        'admin' => [
+            'provider' => \App\Providers\Filament\AdminPanelProvider::class,
+        ],
+    ],
+
+    'dark_mode' => true,
+
+    'favicon_url' => null,
+
+    'max_content_width' => null,
+
+    'notifications' => [
+        'enabled' => true,
+        'position' => 'top-right',
+    ],
+
+    'broadcasting' => [
+        'echo' => [
+            'broadcaster' => 'pusher',
+        ],
+    ],
+
+    'database' => [
+        'is_eager_loaded' => true,
+    ],
+];

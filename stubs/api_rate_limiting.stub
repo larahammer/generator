@@ -1,0 +1,61 @@
+// Add to app/Http/Kernel.php
+
+<?php
+
+namespace App\Http;
+
+use Illuminate\Foundation\Http\Kernel as HttpKernel;
+
+class Kernel extends HttpKernel
+{
+    protected $middlewareGroups = [
+        'api' => [
+            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+            'throttle:api',
+            \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            \App\Http\Middleware\ApiAuthentication::class, // Add this
+        ],
+    ];
+
+    protected $routeMiddleware = [
+        // ... existing middleware ...
+        'api.auth' => \App\Http\Middleware\ApiAuthentication::class,
+        'api.rate' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
+    ];
+}
+
+// In routes/api.php
+
+Route::middleware('api.auth')->group(function () {
+    // GET list
+    Route::get('/resource', [ResourceController::class, 'index'])
+        ->name('resource.index');
+    
+    // GET single
+    Route::get('/resource/{id}', [ResourceController::class, 'show'])
+        ->name('resource.show');
+    
+    // POST create
+    Route::post('/resource', [ResourceController::class, 'store'])
+        ->name('resource.create');
+    
+    // PATCH/PUT update
+    Route::put('/resource/{id}', [ResourceController::class, 'update'])
+        ->name('resource.update');
+    
+    // DELETE
+    Route::delete('/resource/{id}', [ResourceController::class, 'destroy'])
+        ->name('resource.destroy');
+});
+
+// Rate limiting examples:
+// 'throttle:60,1' => 60 requests per 1 minute
+// 'throttle:api' => Uses default from config/api.php (150 requests per minute)
+
+Route::middleware('throttle:100,1')->group(function () {
+    // High rate limit for specific endpoints
+    Route::get('/resource/search', SearchController::class);
+});
+
+// Token creation for client:
+// $token = auth()->user()->createToken('api-token')->plainTextToken;

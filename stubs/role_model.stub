@@ -1,0 +1,37 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Role extends Model
+{
+    use HasFactory;
+
+    protected $fillable = ['name', 'description'];
+
+    /**
+     * A role has many users.
+     */
+    public function users()
+    {
+        return $this->hasMany(User::class);
+    }
+
+    /**
+     * Check if role has a specific name.
+     */
+    public function is(string $name): bool
+    {
+        return $this->name === $name;
+    }
+
+    /**
+     * Check if role has any of the given names.
+     */
+    public function isAny(array $names): bool
+    {
+        return in_array($this->name, $names);
+    }
+}

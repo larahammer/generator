@@ -1,0 +1,58 @@
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
+
+/**
+ * API Authentication Middleware
+ * 
+ * Validates API bearer token from Authorization header
+ * Uses Laravel Sanctum by default
+ * 
+ * Usage:
+ *   Route::middleware('api', 'api.auth')->group(function () {
+ *       Route::get('/api/resource', ResourceController::class);
+ *   });
+ */
+class ApiAuthentication
+{
+    public function handle(Request $request, Closure $next): Response
+    {
+        // Guard against missing Authorization header
+        if (!$request->headers->has('Authorization')) {
+            return response()->json([
+                'message' => 'Missing Authorization header'
+            ], 401);
+        }
+
+        // Validate token format: Bearer <token>
+        $token = $request->bearerToken();
+
+        if (!$token) {
+            return response()->json([
+                'message' => 'Invalid Authorization header format'
+            ], 401);
+        }
+
+        // Attempt token authentication
+        if (!Auth::guard('sanctum')->check()) {
+            return response()->json([
+                'message' => 'Unauthorized'
+            ], 401);
+        }
+
+        // Check if user has required abilities/scopes
+        $requiredAbility = $request->route()?->getName() ?? 'default';
+        if ($request->user()?->tokenCan($requiredAbility) === false) {
+            return response()->json([
+                'message' => 'Insufficient permissions'
+            ], 403);
+        }
+
+        return $next($request);
+    }
+}

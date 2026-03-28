@@ -1,0 +1,30 @@
+// Add these to your app\Http\Kernel.php
+
+// In the $routeMiddleware array, add:
+protected $routeMiddleware = [
+    // ... existing middleware ...
+    'role' => \App\Http\Middleware\CheckRole::class,
+    'admin' => \App\Http\Middleware\AdminPanelProtection::class,
+];
+
+// Example route usage:
+// routes/web.php
+
+// Protected by role
+Route::group(['middleware' => 'role:admin,editor'], function () {
+    Route::get('/content-management', ContentController::class);
+});
+
+// Protected by admin role only
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/admin/users', UserController::class);
+    Route::get('/admin/roles', RoleController::class);
+});
+
+// For Filament admin panel, add this to your PanelProvider:
+// config/filament.php or in your admin panel provider
+'middleware' => [
+    'web',
+    'auth',
+    'admin', // Protect with admin middleware
+],

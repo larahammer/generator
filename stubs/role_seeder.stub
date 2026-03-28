@@ -1,0 +1,28 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\Role;
+use Illuminate\Database\Seeder;
+
+class RoleSeeder extends Seeder
+{
+    public function run(): void
+    {
+        $roles = [
+            ['name' => 'admin', 'description' => 'Administrator with full access'],
+            ['name' => 'editor', 'description' => 'Can create and edit content'],
+            ['name' => 'viewer', 'description' => 'Can only view content'],
+            ['name' => 'user', 'description' => 'Regular user'],
+        ];
+
+        foreach ($roles as $role) {
+            Role::updateOrCreate(
+                ['name' => $role['name']],
+                $role
+            );
+        }
+
+        $this->command->info('✓ Roles seeded successfully');
+    }
+}

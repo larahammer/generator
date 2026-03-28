@@ -1,0 +1,30 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\{{ model }};
+use Illuminate\Database\Seeder;
+
+class {{ model }}Seeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        // Create 50 {{ model }} records with factory
+        {{ model }}::factory(50)->create();
+
+        // Or create with specific attributes
+        {{ model }}::factory(10)->active()->create();
+        {{ model }}::factory(5)->inactive()->create();
+
+        // Create with relationships (if applicable)
+        // {{ model }}::factory(20)
+        //     ->has(Comment::factory(3))
+        //     ->has(Tag::factory(5))
+        //     ->create();
+
+        $this->command->info('✓ {{ model }} records seeded successfully');
+    }
+}
