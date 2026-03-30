@@ -4,6 +4,8 @@ namespace Larahammer\Generator;
 
 use Illuminate\Support\ServiceProvider;
 use Larahammer\Generator\Commands\MakeCommand;
+use Larahammer\Generator\Commands\UpdateCommand;
+use Larahammer\Generator\Commands\DeleteCommand;
 
 class GeneratorServiceProvider extends ServiceProvider
 {
@@ -20,6 +22,8 @@ class GeneratorServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 MakeCommand::class,
+                UpdateCommand::class,
+                DeleteCommand::class
             ]);
 
             $this->publishes([

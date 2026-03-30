@@ -38,32 +38,29 @@ class SoftDeletesGenerator extends BaseGenerator
     }
 
     private function updateModelForSoftDeletes(): void
-    {
-        $modelPath = app_path("Models/{$this->modelName()}.php");
+{
+    $modelPath = app_path("Models/{$this->modelName()}.php");
 
-        if (!$this->files->exists($modelPath)) {
-            return;
-        }
-
-        $content = $this->files->get($modelPath);
-
-        // Add SoftDeletes trait only if not already present
-        if (strpos($content, 'SoftDeletes') === false) {
-            // Add use statement
-            $content = str_replace(
-                'use Illuminate\Database\Eloquent\Model;',
-                "use Illuminate\Database\Eloquent\Model;\nuse Illuminate\Database\Eloquent\SoftDeletes;",
-                $content
-            );
-
-            // Add trait
-            $content = str_replace(
-                'class ' . $this->modelName() . ' extends Model',
-                'class ' . $this->modelName() . " extends Model\n{\n    use SoftDeletes;",
-                $content
-            );
-
-            $this->files->put($modelPath, $content);
-        }
+    if (!$this->files->exists($modelPath)) {
+        return;
     }
+
+    $content = $this->files->get($modelPath);
+
+    if (strpos($content, 'SoftDeletes') === false) {
+        $content = str_replace(
+            'use Illuminate\Database\Eloquent\Model;',
+            "use Illuminate\Database\Eloquent\Model;\nuse Illuminate\Database\Eloquent\SoftDeletes;",
+            $content
+        );
+
+        $content = str_replace(
+            'class ' . $this->modelName() . ' extends Model' . "\n{",
+            'class ' . $this->modelName() . ' extends Model' . "\n{\n    use SoftDeletes;",
+            $content
+        );
+
+        $this->files->put($modelPath, $content);
+    }
+}
 }

@@ -22,7 +22,7 @@ class Role extends Model
     /**
      * Check if role has a specific name.
      */
-    public function is(string $name): bool
+    public function hasName(string $name): bool
     {
         return $this->name === $name;
     }
